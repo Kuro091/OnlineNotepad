@@ -58,13 +58,13 @@ export const TopNav = () => {
     return (
         <div className="flex flex-row">
             {leftFeatures && leftFeatures.map(feature => (
-                <div className="mt-2 mx-3 p-4 w-16 h-16 flex items-center justify-center rounded-lg text-gray-500">{feature.icon}</div>
+                <div key={feature.name} className="mt-2 mx-3 p-4 w-16 h-16 flex items-center justify-center rounded-lg text-gray-500">{feature.icon}</div>
             ))}
 
             <div className="mx-5 my-3 border-r-4 rounded-lg border-gray-100 "></div>
 
             {rightFeatures && rightFeatures.map(feature => (
-                <div className="mt-2 mx-3 p-4 w-16 h-16 flex items-center justify-center rounded-lg text-gray-500">{feature.icon}</div>
+                <div key={feature.name} className="mt-2 mx-3 p-4 w-16 h-16 flex items-center justify-center rounded-lg text-gray-500">{feature.icon}</div>
             ))}
         </div>
     )
