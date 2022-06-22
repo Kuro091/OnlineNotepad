@@ -39,9 +39,6 @@ export const Main = () => {
                         html={content}
                         onChange={(e) => handleChange(e, 'content')}
                     />
-
-                    <div>new title is {selectedNote?.title}</div>
-                    <div>new content is {selectedNote?.content}</div>
                 </div>
             }
 

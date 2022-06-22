@@ -10,7 +10,7 @@ function Home() {
   return (
     <div className="justify-center items-center h-full w-full bg-white font-sans">
       <div className="min-h-screen h-full grid grid-rows-12 grid-cols-6  text-white text-sm text-center">
-        <div className="col-span-6 bg-gray-400">
+        <div className="col-span-6 bg-gray-300">
           {/* TopNav */}
           <TopNav />
         </div>
