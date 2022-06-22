@@ -31,6 +31,7 @@ export const Main = () => {
                 <div className='text-left h-full min-h-full'>
 
                     <ContentEditable
+                        className='font-bold'
                         html={title}
                         onChange={(e) => handleChange(e, 'title')}
                     />
