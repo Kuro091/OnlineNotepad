@@ -1,42 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
+import { useSelector } from 'react-redux'
 import { Main } from '../components/Main'
 import { SideBar } from '../components/SideBar'
 import { TopNav } from '../components/TopNav'
 import { supabase } from '../utils/supabaseClient'
 
-export default function Home() {
-  const notes = [
-    {
-      id: 1,
-      title: 'Title1',
-      content: 'hi',
-      timestamp: '9:34 AM'
-    },
-    {
-      id: 2,
-      title: 'Title2',
-      content: 'hi',
-      timestamp: '9:34 AM'
-    },
-    {
-      id: 3,
-      title: 'Title3',
-      content: 'hi',
-      timestamp: '9:34 AM'
-    },
-    {
-      id: 4,
-      title: 'Title4',
-      content: 'hi',
-      timestamp: '9:34 AM'
-    },
-    {
-      id: 5,
-      title: 'Title5',
-      content: 'hi',
-      timestamp: '9:34 AM'
-    },
-  ]
+function Home() {
 
   return (
     <div className="justify-center items-center h-full w-full bg-white font-sans">
@@ -47,16 +16,17 @@ export default function Home() {
         </div>
         <div className="row-[span_11_/_span_11] p-4 border bg-white text-black ">
           {/* Sidebar */}
-          <SideBar notes={notes} />
+          <SideBar />
         </div>
         <div className="row-[span_11_/_span_11] col-span-5 p-4 border bg-white text-black">
           {/* Main */}
-          <Main note={notes.find(note => note.id == 1)} />
+          <Main />
         </div>
       </div>
-
 
     </div >
 
   )
 }
+
+export default Home
