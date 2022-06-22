@@ -34,7 +34,7 @@ export const Main = ({ note }) => {
 
 
                 <div>new title is {title}</div>
-                <div>new title is {content}</div>
+                <div>new content is {content}</div>
             </div>
 
 
