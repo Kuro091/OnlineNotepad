@@ -7,4 +7,8 @@ export const store = configureStore({
     reducer: {
         notes: notesReducer
     },
+    middleware: getDefaultMiddleware =>
+        getDefaultMiddleware({
+            serializableCheck: false,
+        }),
 });
