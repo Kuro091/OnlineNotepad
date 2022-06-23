@@ -8,13 +8,12 @@ const initialState = {
     data: [
         {
             id: 1,
-            title: 'Loading...',
-            content: 'Loading...',
-            created_at: new Date(2022, 6, 22, 1, 1, 1, 1),
-            updated_at: new Date(2022, 6, 22, 1, 1, 1, 1),
+            title: 'Sample note',
+            created_at: new Date(2022, 6, 22, 1, 1, 1, 1).toISOString(),
+            updated_at: new Date(2022, 6, 22, 1, 1, 1, 1).toISOString(),
             selected: false,
             content: {
-                html: ''
+                html: 'Sample note'
             }
         }
     ],
@@ -23,23 +22,26 @@ const initialState = {
 }
 
 
-export const getNotesServer = createAsyncThunk('notes/getNotes', async () => {
+export const getNotesServer = createAsyncThunk('notes/getNotes', async (userId) => {
     try {
         let { data, error } = await supabase
             .from('notes')
             .select('*, content(*)')
-        if (data) {
+            .eq('user_id', userId);
+
+        if (data.length > 0) {
             data.forEach(note => note.selected = false)
             data[0].selected = true
             return data;
         }
+        return initialState.data
     } catch (err) {
         console.log('getErr', err)
     }
 
 })
 
-export const addNoteServer = createAsyncThunk('notes/addNote', async () => {
+export const addNoteServer = createAsyncThunk('notes/addNote', async (userId) => {
     try {
         const newNote = generateNewNote();
         const { data: contentData, error: contentErr } = await supabase
@@ -51,6 +53,7 @@ export const addNoteServer = createAsyncThunk('notes/addNote', async () => {
 
         if (contentData) {
             newNote.content_id = contentData.id;
+            newNote.user_id = userId;
             const { data: noteInsertData, error: noteErr } = await supabase
                 .from('notes')
                 .insert([newNote], { upsert: true })
@@ -127,9 +130,14 @@ export const notesSlice = createSlice({
     name: 'notes',
     initialState,
     reducers: {
+        setNotes: (state, { payload }) => {
+            state.data = payload
+        },
         addNote: (state, action) => {
             state.data.forEach(note => note.selected = false);
-            state.data.push(generateNewNote());
+            const newNote = generateNewNote();
+            newNote.selected = true
+            state.data.push(newNote);
         },
         setSelected: (state, { payload: id }) => {
             state.data.forEach(note => note.selected = false);
@@ -151,7 +159,9 @@ export const notesSlice = createSlice({
             let findIndex = state.data.findIndex(note => note.id == payload.id);
 
             if (findIndex != -1) {
-                state.data[findIndex] = { ...state.data[findIndex], payload };
+                state.data[findIndex].title = payload.title;
+                state.data[findIndex].content.html = payload.content.html;
+                state.pending = false
             }
         }
     },
@@ -196,12 +206,10 @@ export const notesSlice = createSlice({
                 state.pending = true;
             })
             .addCase(updateNoteServer.fulfilled, (state, { payload }) => {
-                state.data.forEach(note => note.selected = false);
                 const findIndex = state.data.findIndex(note => note.id == payload.id);
 
                 state.data[findIndex].title = payload.title;
                 state.data[findIndex].content.html = payload.content.html;
-                state.data[findIndex].selected = true;
                 state.pending = false
             })
     }
@@ -209,12 +217,15 @@ export const notesSlice = createSlice({
 
 
 const generateNewNote = () => {
-    return { id: uuidv4().substr(0, 4), title: 'New Note', content: { html: 'New Note' }, created_at: new Date(), updated_at: new Date(), selected: false }
+    return { id: uuidv4().substr(0, 4), title: 'New Note', content: { html: 'New Note' }, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), selected: false }
 }
 
 export const {
     setSelected,
-    updateNote
+    updateNote,
+    deleteNote,
+    addNote,
+    setNotes
 } = notesSlice.actions
 
 export const selectSelectedNote = (state) => {

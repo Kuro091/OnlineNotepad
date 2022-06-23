@@ -3,18 +3,28 @@ import {
     ViewGridIcon,
     TrashIcon,
     PencilAltIcon,
-    UsersIcon
+    UsersIcon,
+    BanIcon
 } from "@heroicons/react/solid";
+import { isEmpty } from 'lodash';
 import { useDispatch, useSelector } from "react-redux";
+import { showModal, logOut, selectUser } from '../features/auth/authSlice';
 import {
     addNoteServer,
     deleteNoteServer,
     selectSelectedNote,
+    addNote,
+    deleteNote,
+    updateNote
 } from "../features/notes/notesSlice";
+import { supabase } from '../utils/supabaseClient';
 export const TopNav = () => {
     const dispatch = useDispatch();
     const selectedNote = useSelector(selectSelectedNote);
     const notes = useSelector((state) => state.notes);
+    const auth = useSelector(selectUser);
+
+    console.log('auth ', auth);
     const leftFeatures = [
         {
             name: "List",
@@ -31,7 +41,11 @@ export const TopNav = () => {
             type: "delete",
             icon: <TrashIcon />,
             clickHandler: () => {
-                dispatch(deleteNoteServer(selectedNote.id));
+                if (!isEmpty(auth)) {
+                    dispatch(deleteNoteServer(selectedNote.id));
+                    return;
+                }
+                dispatch(deleteNote(selectedNote.id))
             },
             disabled: notes.data.length <= 0,
         },
@@ -43,7 +57,11 @@ export const TopNav = () => {
             type: "new",
             icon: <PencilAltIcon />,
             clickHandler: () => {
-                dispatch(addNoteServer());
+                if (!isEmpty(auth)) {
+                    dispatch(addNoteServer(auth.id));
+                    return;
+                }
+                dispatch(addNote())
             },
         },
         {
@@ -51,13 +69,19 @@ export const TopNav = () => {
             type: "login",
             icon: <UsersIcon />,
             clickHandler: () => {
-
-            }
+                dispatch(showModal());
+            },
+            disabled: !isEmpty(auth)
         },
         {
-            name: "Lista",
-            type: "list",
-            icon: <ViewListIcon />,
+            name: "Logout",
+            type: "logout",
+            icon: <BanIcon />,
+            clickHandler: () => {
+                dispatch(logOut());
+            },
+            disabled: isEmpty(auth)
+
         },
         {
             name: "Listd",
@@ -99,10 +123,9 @@ export const TopNav = () => {
             {rightFeatures &&
                 rightFeatures.map((feature) => (
                     <div
-                        disabled={feature.disabled}
                         onClick={feature.clickHandler}
                         key={feature.name}
-                        className="p-4 w-16 h-16 flex items-center justify-center rounded-lg text-gray-500 hover:cursor-pointer"
+                        className={`p-4 w-16 h-16 flex items-center justify-center rounded-lg text-gray-500 hover:cursor-pointer  ${feature.disabled ? 'pointer-events-none opacity-10' : ''}`}
                     >
                         {feature.icon}
                     </div>
