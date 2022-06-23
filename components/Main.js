@@ -54,13 +54,13 @@ export const Main = () => {
 
                     <ContentEditable
                         disabled={notes.pending}
-                        className='font-bold'
+                        className='font-bold text-4xl'
                         html={title}
                         onChange={(e) => handleChange(e, 'title')}
                     />
                     <ContentEditable
                         disabled={notes.pending}
-                        className='h-5/6'
+                        className='h-5/6 text-lg'
                         html={content}
                         onChange={(e) => handleChange(e, 'content')}
                     />

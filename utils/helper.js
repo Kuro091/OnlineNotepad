@@ -1,4 +1,8 @@
+
+import { parse } from 'node-html-parser';
+
+
 export function strip(html) {
-    let doc = new DOMParser().parseFromString(html, 'text/html');
-    return doc.body.textContent || "";
+    const root = parse(html);
+    return root.textContent
 }
