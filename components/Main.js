@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectSelectedNote, updateNoteServer, updateNote } from '../features/notes/notesSlice';
 import _debounce from 'lodash/debounce';
 
-export const Main = memo(() => {
+const Main = memo(() => {
     const selectedNote = useSelector(selectSelectedNote)
     const dispatch = useDispatch();
     const [title, setTitle] = useState('');
@@ -62,3 +62,5 @@ export const Main = memo(() => {
         </div >
     )
 });
+
+export default Main;

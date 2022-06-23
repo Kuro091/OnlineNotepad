@@ -16,7 +16,7 @@ function Home() {
   }, [notes]);
   useEffect(() => {
     dispatch(getNotesServer());
-  }, [])
+  }, [dispatch])
 
 
   return (
