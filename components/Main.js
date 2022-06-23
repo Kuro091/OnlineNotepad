@@ -17,17 +17,20 @@ export const Main = () => {
     }, 750), [])
 
     const handleChange = useCallback((e, type) => {
-        const value = e.target.value == '<br>' ? ' ' : e.target.value;
-        console.log(value);
+        const value = e.target.value === '<br>' ? ' ' : e.target.value;
+        let _title = title;
+        let _content = content;
         switch (type) {
             case 'title':
                 setTitle(value);
+                _title = value;
                 break;
             case 'content':
                 setContent(value);
+                _content = value;
                 break;
         }
-        const updatedObj = { ...selectedNote, title: title, content: { html: content }, updated_at: new Date() };
+        const updatedObj = { ...selectedNote, title: _title, content: { html: _content }, updated_at: new Date() };
         debounceUpdate(updatedObj);
     })
 
