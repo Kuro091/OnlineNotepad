@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { hideModal, logIn } from '../features/auth/authSlice';
 import { supabase } from '../utils/supabaseClient';
 
-export const LoginModal = memo(() => {
+export const LoginModal = () => {
     const dispatch = useDispatch();
     const auth = useSelector(state => state.auth);
     const [email, setEmail] = useState('');
@@ -41,4 +41,4 @@ export const LoginModal = memo(() => {
             </div>
         </div>
     )
-})
+}
