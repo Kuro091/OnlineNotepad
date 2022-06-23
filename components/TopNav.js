@@ -86,7 +86,7 @@ export const TopNav = () => {
                     <div
                         onClick={feature.clickHandler}
                         key={feature.name}
-                        className={`mt-2 mx-3 p-4 w-16 h-16 flex items-center justify-center rounded-lg text-gray-500 hover:cursor-pointer ${feature.disabled ? 'pointer-events-none opacity-10' : ''} `}
+                        className={`p-4 w-16 h-16 flex items-center justify-center rounded-lg text-gray-500 hover:cursor-pointer ${feature.disabled ? 'pointer-events-none opacity-10' : ''} `}
                     >
                         {feature.icon}
                     </div>
@@ -100,7 +100,7 @@ export const TopNav = () => {
                         disabled={feature.disabled}
                         onClick={feature.clickHandler}
                         key={feature.name}
-                        className="mt-2 mx-3 p-4 w-16 h-16 flex items-center justify-center rounded-lg text-gray-500 hover:cursor-pointer"
+                        className="p-4 w-16 h-16 flex items-center justify-center rounded-lg text-gray-500 hover:cursor-pointer"
                     >
                         {feature.icon}
                     </div>
