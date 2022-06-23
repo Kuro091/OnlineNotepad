@@ -3,6 +3,7 @@ import {
     ViewGridIcon,
     TrashIcon,
     PencilAltIcon,
+    UsersIcon
 } from "@heroicons/react/solid";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -46,9 +47,12 @@ export const TopNav = () => {
             },
         },
         {
-            name: "Listx",
-            type: "list",
-            icon: <ViewListIcon />,
+            name: "Login",
+            type: "login",
+            icon: <UsersIcon />,
+            clickHandler: () => {
+
+            }
         },
         {
             name: "Lista",
