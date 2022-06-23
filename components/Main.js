@@ -4,16 +4,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectSelectedNote, updateNoteServer, updateNote } from '../features/notes/notesSlice';
 import _debounce from 'lodash/debounce';
 
-const Main = memo(() => {
+export const Main = () => {
     const selectedNote = useSelector(selectSelectedNote)
     const dispatch = useDispatch();
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [timestamp, setTimestamp] = useState('')
+    const notes = useSelector(state => state.notes);
 
     const debounceUpdate = useCallback(_debounce((updatedObj) => {
         dispatch(updateNoteServer(updatedObj));
-    }, 500), [])
+    }, 750), [])
 
     const handleChange = useCallback((e, type) => {
         const value = e.target.value == '<br>' ? ' ' : e.target.value;
@@ -48,11 +49,13 @@ const Main = memo(() => {
                 <div className='text-left h-full min-h-full text-ellipsis overflow-hidden '>
 
                     <ContentEditable
+                        disabled={notes.pending}
                         className='font-bold'
                         html={title}
                         onChange={(e) => handleChange(e, 'title')}
                     />
                     <ContentEditable
+                        disabled={notes.pending}
                         className='h-5/6'
                         html={content}
                         onChange={(e) => handleChange(e, 'content')}
@@ -61,6 +64,4 @@ const Main = memo(() => {
             }
         </div >
     )
-});
-
-export default Main;
+};
