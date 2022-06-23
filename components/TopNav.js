@@ -77,8 +77,6 @@ export const TopNav = () => {
         },
     ];
 
-    console.log(notes);
-
     return (
         <div className="flex flex-row">
             {leftFeatures &&
