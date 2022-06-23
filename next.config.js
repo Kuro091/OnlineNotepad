@@ -13,10 +13,10 @@ const nextConfig = {
     return [
       {
         // matching all API routes
-        source: "/*",
+        source: "/:path*",
         headers: [
           { key: "Access-Control-Allow-Credentials", value: "true" },
-          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Access-Control-Allow-Origin", value: "https://online-notepad-kuro091.vercel.app/, https://online-notepad-one.vercel.app/, https://online-notepad-git-main-kuro091.vercel.app/" },
           { key: "Access-Control-Allow-Methods", value: "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
           { key: "Access-Control-Allow-Headers", value: "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" },
         ]
