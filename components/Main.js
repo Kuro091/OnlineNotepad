@@ -18,6 +18,7 @@ export const Main = () => {
 
     const handleChange = useCallback((e, type) => {
         const value = e.target.value == '<br>' ? ' ' : e.target.value;
+        console.log(value);
         switch (type) {
             case 'title':
                 setTitle(value);
