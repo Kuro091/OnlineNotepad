@@ -2,6 +2,7 @@ import { isEmpty } from 'lodash'
 import { useState, useEffect, useMemo, Fragment } from 'react'
 import { TailSpin } from 'react-loader-spinner'
 import { useDispatch, useSelector } from 'react-redux'
+import { ListGrid } from '../components/ListGrid'
 import { LoginModal } from '../components/LoginModal'
 import { Main } from '../components/Main'
 import { SideBar } from '../components/SideBar'
@@ -14,7 +15,7 @@ function Home() {
   const dispatch = useDispatch();
   const notes = useSelector(state => state.notes);
   const auth = useSelector(state => state.auth);
-
+  const viewMode = useSelector(state => state.auth.viewMode);
   const user = supabase.auth.user();
 
   useEffect(() => {
@@ -46,10 +47,9 @@ function Home() {
     })
   }, [])
 
-
-
   return (
     <Fragment>
+
       { notes.pending &&
         <div className='bg-white z-[9999] opacity-50 absolute h-full w-full'>
           <TailSpin className='absolute top-[50%]' color="#00BFFF" height={80} width={80} />
@@ -64,14 +64,29 @@ function Home() {
             {/* TopNav */}
             <TopNav />
           </div>
-          <div className="row-[span_12_/_span_12] p-4 border bg-white text-black ">
-            {/* Sidebar */}
-            <SideBar />
-          </div>
-          <div className="row-[span_12_/_span_12] col-span-5 p-4 border bg-white text-black">
-            {/* Main */}
-            <Main />
-          </div>
+
+
+          {viewMode && viewMode == 'list' &&
+            <>
+              <div className="row-[span_12_/_span_12] p-4 border bg-white text-black ">
+                {/* Sidebar */}
+                <SideBar />
+              </div>
+              <div className="row-[span_12_/_span_12] col-span-5 p-4 border bg-white text-black">
+                {/* Main */}
+                <Main />
+              </div>
+            </>
+          }
+
+          {viewMode && viewMode == 'list_grid' &&
+            <div className='row-[span_12_/_span_12] col-span-6'>
+              <ListGrid />
+            </div>
+          }
+
+
+
         </div>
 
       </div >

@@ -7,7 +7,8 @@ const initialState = {
     data: {},
     pending: false,
     error: false,
-    isModalShow: false
+    isModalShow: false,
+    viewMode: 'list'
 }
 
 
@@ -44,6 +45,9 @@ export const authSlice = createSlice({
         },
         setUserData: (state, { payload }) => {
             state.data = payload;
+        },
+        setViewMode: (state, { payload }) => {
+            state.viewMode = payload;
         }
     },
     extraReducers: builder => {
@@ -79,7 +83,8 @@ export const authSlice = createSlice({
 export const {
     showModal,
     hideModal,
-    setUserData
+    setUserData,
+    setViewMode
 } = authSlice.actions
 
 export const selectUser = (state) => {

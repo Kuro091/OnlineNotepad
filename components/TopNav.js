@@ -8,32 +8,44 @@ import {
 } from "@heroicons/react/solid";
 import { isEmpty } from 'lodash';
 import { useDispatch, useSelector } from "react-redux";
-import { showModal, logOut, selectUser } from '../features/auth/authSlice';
+import { showModal, logOut, selectUser, setViewMode } from '../features/auth/authSlice';
 import {
     addNoteServer,
     deleteNoteServer,
     selectSelectedNote,
     addNote,
     deleteNote,
-    updateNote
+    updateNote,
 } from "../features/notes/notesSlice";
+
 import { supabase } from '../utils/supabaseClient';
+
+
 export const TopNav = () => {
     const dispatch = useDispatch();
     const selectedNote = useSelector(selectSelectedNote);
     const notes = useSelector((state) => state.notes);
     const auth = useSelector(selectUser);
+    const viewMode = useSelector(state => state.auth.viewMode);
 
     const leftFeatures = [
         {
             name: "List",
             type: "list",
             icon: <ViewListIcon />,
+            actived: viewMode == 'list',
+            clickHandler: () => {
+                dispatch(setViewMode('list'))
+            }
         },
         {
             name: "ListGrid",
             type: "listGrid",
             icon: <ViewGridIcon />,
+            actived: viewMode == 'list_grid',
+            clickHandler: () => {
+                dispatch(setViewMode('list_grid'))
+            }
         },
         {
             name: "Delete",
@@ -111,15 +123,18 @@ export const TopNav = () => {
                     <div
                         onClick={feature.clickHandler}
                         key={feature.name}
-                        className={`p-4 w-16 h-16 flex items-center justify-center rounded-lg text-gray-500 hover:cursor-pointer ${feature.disabled ? 'pointer-events-none opacity-10' : ''} `}
+                        className={`p-4 w-16 h-16 flex items-center justify-center rounded-lg text-gray-500 hover:cursor-pointer ${feature.disabled ? 'pointer-events-none opacity-10' : ''}
+                        ${feature.actived ? 'bg-slate-600' : ''} `}
                     >
                         {feature.icon}
                     </div>
-                ))}
+                ))
+            }
 
             <div className="mx-5 my-3 border-r-4 rounded-lg border-gray-100 "></div>
 
-            {rightFeatures &&
+            {
+                rightFeatures &&
                 rightFeatures.map((feature) => (
                     <div
                         onClick={feature.clickHandler}
@@ -128,7 +143,8 @@ export const TopNav = () => {
                     >
                         {feature.icon}
                     </div>
-                ))}
-        </div>
+                ))
+            }
+        </div >
     );
 };
