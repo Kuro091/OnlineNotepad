@@ -7,7 +7,7 @@ import { Main } from '../components/Main'
 import { SideBar } from '../components/SideBar'
 import { TopNav } from '../components/TopNav'
 import { logIn, logOut, setUserData } from '../features/auth/authSlice'
-import { getNotesServer, setNotes } from '../features/notes/notesSlice'
+import { getNotesServer, setNotes, addNote } from '../features/notes/notesSlice'
 import { supabase } from '../utils/supabaseClient'
 
 function Home() {
@@ -27,6 +27,9 @@ function Home() {
 
 
   useEffect(() => {
+    dispatch(setNotes([]))
+    dispatch(addNote())
+
     supabase.auth.onAuthStateChange((_event, session) => {
       console.log('_event ', _event);
       switch (_event) {

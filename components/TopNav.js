@@ -24,7 +24,6 @@ export const TopNav = () => {
     const notes = useSelector((state) => state.notes);
     const auth = useSelector(selectUser);
 
-    console.log('auth ', auth);
     const leftFeatures = [
         {
             name: "List",

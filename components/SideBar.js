@@ -14,7 +14,7 @@ export const SideBar = () => {
                     <div className='max-h-full text-left ml-5 mr-5 mt-4 h-fit w-fit text-ellipsis overflow-hidden'>
                         <p className="text-gray-800 font-bold">{strip(note.title)}</p>
                         <div className='flex'>
-                            <span className='mr-3'>{note.updated_at.toString().split('T')[1].substr(0, 5)}</span>
+                            <span className='mr-3'>{note.updated_at.toLocaleString().substr(0, 5)}</span>
                             <span className="text-gray-600 line-clamp-1">{strip(note.content.html)}</span>
                         </div>
                     </div>

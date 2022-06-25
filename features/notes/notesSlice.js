@@ -9,8 +9,8 @@ const initialState = {
         {
             id: 1,
             title: 'Sample note',
-            created_at: new Date(2022, 6, 22, 1, 1, 1, 1).toISOString(),
-            updated_at: new Date(2022, 6, 22, 1, 1, 1, 1).toISOString(),
+            created_at: new Date(2022, 6, 22, 1, 1, 1, 1).toLocaleString(),
+            updated_at: new Date(2022, 6, 22, 1, 1, 1, 1).toLocaleString(),
             selected: false,
             content: {
                 html: 'Sample note'
@@ -30,15 +30,18 @@ export const getNotesServer = createAsyncThunk('notes/getNotes', async (userId) 
             .eq('user_id', userId);
 
         if (data.length > 0) {
-            data.forEach(note => note.selected = false)
-            data[0].selected = true
+            data.forEach(note => {
+                note.selected = false;
+                note.created_at = new Date(note.created_at);
+                note.updated_at = new Date(note.updated_at)
+            })
+            data[0].selected = true;
             return data;
         }
         return initialState.data
     } catch (err) {
         console.log('getErr', err)
     }
-
 })
 
 export const addNoteServer = createAsyncThunk('notes/addNote', async (userId) => {
@@ -54,6 +57,7 @@ export const addNoteServer = createAsyncThunk('notes/addNote', async (userId) =>
         if (contentData) {
             newNote.content_id = contentData.id;
             newNote.user_id = userId;
+
             const { data: noteInsertData, error: noteErr } = await supabase
                 .from('notes')
                 .insert([newNote], { upsert: true })
@@ -65,6 +69,8 @@ export const addNoteServer = createAsyncThunk('notes/addNote', async (userId) =>
                 .eq('id', noteInsertData.id)
                 .single();
 
+            noteData.created_at = new Date(noteData.created_at);
+            noteData.updated_at = new Date(noteData.updated_at);
             return noteData;
         }
     } catch (err) {
@@ -114,7 +120,8 @@ export const updateNoteServer = createAsyncThunk('notes/updateNote', async (payl
             .update([payload])
             .eq('id', id)
             .single()
-
+        noteData.created_at = new Date(noteData.created_at);
+        noteData.updated_at = new Date(noteData.updated_at);
         noteData.content = contentData;
 
         return noteData;
@@ -161,6 +168,7 @@ export const notesSlice = createSlice({
             if (findIndex != -1) {
                 state.data[findIndex].title = payload.title;
                 state.data[findIndex].content.html = payload.content.html;
+                state.data[findIndex].updated_at = payload.updated_at;
                 state.pending = false
             }
         }
@@ -210,6 +218,7 @@ export const notesSlice = createSlice({
 
                 state.data[findIndex].title = payload.title;
                 state.data[findIndex].content.html = payload.content.html;
+                state.data[findIndex].updated_at = payload.updated_at;
                 state.pending = false
             })
     }
@@ -217,7 +226,7 @@ export const notesSlice = createSlice({
 
 
 const generateNewNote = () => {
-    return { id: uuidv4().substr(0, 4), title: 'New Note', content: { html: 'New Note' }, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), selected: false }
+    return { id: uuidv4().substr(0, 4), title: 'New Note', content: { html: 'New Note' }, created_at: new Date(), updated_at: new Date(), selected: false }
 }
 
 export const {

@@ -11,7 +11,10 @@ export const Main = () => {
     const dispatch = useDispatch();
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
-    const [timestamp, setTimestamp] = useState('')
+    const [timestamp, setTimestamp] = useState({
+        type: '',
+        timeStr: ''
+    })
     const notes = useSelector(state => state.notes);
     const auth = useSelector(state => state.auth.data);
 
@@ -38,20 +41,24 @@ export const Main = () => {
                 break;
         }
         const updatedObj = { ...selectedNote, title: _title, content: { html: _content }, updated_at: new Date() };
-        console.log('isEmpty(auth)', isEmpty(auth));
         if (isEmpty(auth)) {
             normalUpdate(updatedObj);
             return;
         }
         debounceUpdate(updatedObj);
-
     })
 
+    const switchTimeStamp = () => {
+        if (isEmpty(timestamp)) return;
+        timestamp.type == 'created_at' ? setTimestamp({ type: 'updated_at', text: 'Updated at', timeStr: selectedNote.updated_at.toLocaleString() })
+            : setTimestamp({ type: 'created_at', text: 'Created at', timeStr: selectedNote.created_at.toLocaleString() })
+            ;
+    }
     useEffect(() => {
         if (selectedNote.id) {
             setTitle(selectedNote.title);
             setContent(selectedNote.content.html);
-            //setTimestamp(selectedNote.updated_at.toString())
+            setTimestamp({ type: 'created_at', text: 'Created at', timeStr: selectedNote.created_at.toLocaleString() })
             return;
         }
         setTitle('');
@@ -61,7 +68,7 @@ export const Main = () => {
 
     return (
         <div className="h-full min-h-full">
-            <div>{timestamp}</div>
+            <div onClick={() => switchTimeStamp()}>{timestamp.text} {timestamp.timeStr}</div>
             {selectedNote.title &&
                 <div className='text-left h-full min-h-full text-ellipsis overflow-hidden break-all'>
                     <ContentEditable
