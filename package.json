@@ -21,6 +21,8 @@
     "react-loader-spinner": "^5.1.5",
     "react-redux": "^8.0.2",
     "react-supabase": "^0.2.0",
+    "redux-persist": "^6.0.0",
+    "sanitize-html": "^2.7.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
