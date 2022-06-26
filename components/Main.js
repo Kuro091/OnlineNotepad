@@ -48,7 +48,7 @@ export const Main = () => {
         return false;
     }
 
-    const handleChange = useCallback((e, type) => {
+    const handleChange = (e, type) => {
         const value = e.target.value === '<br>' ? ' ' : e.target.value;
         let _title = title;
         let _content = content;
@@ -71,7 +71,7 @@ export const Main = () => {
         debounceUpdateServer(updatedObj);
         contentRef.current.focus()
         return false;
-    }, [])
+    };
 
     const sanitizeConf = {
         allowedTags: ["b", "i", "em", "strong", "a", "p", "h1", "img", "div", "br"],
@@ -118,7 +118,7 @@ export const Main = () => {
         setTitle('');
         setContent('');
         setTimestamp('');
-    }, [selectedNote.id, selectedNote.content, re])
+    }, [selectedNote.id, selectedNote.content])
 
     return (
         <div className="h-full min-h-full">
