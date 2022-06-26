@@ -1,13 +1,17 @@
-import { useEffect, useState, memo, useCallback } from 'react'
+import { useEffect, useState, memo, useCallback, createRef } from 'react'
+import { shallowEqual } from 'react-redux';
 import ContentEditable from 'react-contenteditable';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectSelectedNote, updateNoteServer, updateNote } from '../features/notes/notesSlice';
+import { selectSelectedNote, updateNoteServer, updateNote, setCurrentCaretPos } from '../features/notes/notesSlice';
 import _debounce from 'lodash/debounce';
 import { selectUser } from '../features/auth/authSlice';
 import { isEmpty } from 'lodash';
+import sanitizeHtml from "sanitize-html";
+import { getSelectionCaretAndLine } from '../utils/helper';
 
 export const Main = () => {
     const selectedNote = useSelector(selectSelectedNote)
+    const contentRef = createRef();
     const dispatch = useDispatch();
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
@@ -15,15 +19,33 @@ export const Main = () => {
         type: '',
         timeStr: ''
     })
-    const notes = useSelector(state => state.notes);
-    const auth = useSelector(state => state.auth.data);
+
+    const [lines, setLines] = useState([]);
+
+    const debounceValue = useSelector(state => state.auth.debounceValue);
+
+    const notes = useSelector(state => state.notes, shallowEqual);
+    const auth = useSelector(state => state.auth.data, shallowEqual);
+
+    //UPDATE HANDLERS
+    const debounceUpdateServer = useCallback(_debounce((updatedObj) => {
+        dispatch(updateNoteServer(updatedObj));
+    }, debounceValue), [debounceValue])
 
     const debounceUpdate = useCallback(_debounce((updatedObj) => {
-        dispatch(updateNoteServer(updatedObj));
-    }, 750), [])
+        dispatch(updateNote(updatedObj));
+    }, debounceValue), [debounceValue])
 
     const normalUpdate = (updatedObj) => {
         dispatch(updateNote(updatedObj));
+    }
+
+    const evaluateCaretPos = () => {
+        if (contentRef.current) {
+            const currentPos = getSelectionCaretAndLine(contentRef.current.getEl());
+            return false;
+        }
+        return false;
     }
 
     const handleChange = useCallback((e, type) => {
@@ -32,21 +54,36 @@ export const Main = () => {
         let _content = content;
         switch (type) {
             case 'title':
-                setTitle(value);
+                setTitle(e.target.value);
                 _title = value;
                 break;
             case 'content':
-                setContent(value);
+                setContent(e.target.value);
+                evaluateCaretPos();
                 _content = value;
                 break;
         }
-        const updatedObj = { ...selectedNote, title: _title, content: { html: _content }, updated_at: new Date() };
+        const updatedObj = { ...selectedNote, title: sanitizeHtml(_title, sanitizeConf), content: { html: sanitizeHtml(_content, sanitizeConf) }, updated_at: new Date() };
         if (isEmpty(auth)) {
-            normalUpdate(updatedObj);
-            return;
+            type == 'content' ? debounceUpdate(updatedObj) : normalUpdate(updatedObj)
+            return false;
         }
-        debounceUpdate(updatedObj);
+        debounceUpdateServer(updatedObj);
+        contentRef.current.focus()
+        return false;
     })
+
+    const sanitizeConf = {
+        allowedTags: ["b", "i", "em", "strong", "a", "p", "h1", "img", "div", "br"],
+        allowedAttributes: { a: ["href"], img: ['src', 'srcset', 'alt', 'title', 'width', 'height', 'loading'] }
+    };
+
+    //SANITIZE HANDLERS 
+    const sanitize = () => {
+        //setTitle(sanitizeHtml(title, sanitizeConf));
+        //console.log(sanitizeHtml(content, sanitizeConf));
+        //setContent(sanitizeHtml(content, sanitizeConf))
+    }
 
     const switchTimeStamp = () => {
         if (isEmpty(timestamp)) return;
@@ -54,35 +91,63 @@ export const Main = () => {
             : setTimestamp({ type: 'created_at', text: 'Created at', timeStr: selectedNote.created_at.toLocaleString() })
             ;
     }
+
+
+    const getNoOfLines = (noOfLines) => {
+        let lineArr = [];
+        for (let i = 0; i < noOfLines; i++) {
+            lineArr.push(i);
+        }
+        return lineArr
+    }
+    const re = /(<\/div>)|(img*)/g;
     useEffect(() => {
         if (selectedNote.id) {
             setTitle(selectedNote.title);
             setContent(selectedNote.content.html);
             setTimestamp({ type: 'created_at', text: 'Created at', timeStr: selectedNote.created_at.toLocaleString() })
+            const imgCount = 0;
+            if (selectedNote.content.html.match(re)) {
+                selectedNote.content.html.match(re).forEach((match) => { if (match == 'img') imgCount++ })
+                setLines(getNoOfLines(selectedNote.content.html.match(re).length + imgCount * 6));
+            } else {
+                setLines(getNoOfLines(3))
+            }
             return;
         }
         setTitle('');
         setContent('');
         setTimestamp('');
-    }, [selectedNote.id, selectedNote.title, selectedNote.content])
+    }, [selectedNote.id, selectedNote.content])
 
     return (
         <div className="h-full min-h-full">
             <div onClick={() => switchTimeStamp()}>{timestamp.text} {timestamp.timeStr}</div>
             {selectedNote.title &&
-                <div className='text-left h-full min-h-full text-ellipsis overflow-hidden break-all'>
-                    <ContentEditable
-                        disabled={notes.pending}
-                        className='font-bold text-4xl'
-                        html={title}
-                        onChange={(e) => handleChange(e, 'title')}
-                    />
-                    <ContentEditable
-                        disabled={notes.pending}
-                        className='h-5/6 text-lg'
-                        html={content}
-                        onChange={(e) => handleChange(e, 'content')}
-                    />
+                <div className='text-left h-fit min-h-full text-ellipsis overflow-hidden break-all'>
+                    <div className='grid grid-cols-12 grid-rows-12'>
+                        <ContentEditable
+                            disabled={notes.pending}
+                            className='font-bold text-4xl col-span-full row-end-1'
+                            html={title}
+                            onChange={(e) => { handleChange(e, 'title') }}
+                            onBlur={sanitize}
+
+                        />
+                        <div className='text-slate-400 col-span-1 row-[span_11_/_span_11] text-lg'>
+                            {lines.map(line => <div>{line} <br /></div>)}
+                        </div>
+                        <ContentEditable
+                            disabled={notes.pending}
+                            className='min-h-screen col-[span_11_/_span_11] row-[span_11_/_span_11]'
+                            html={content}
+                            onChange={(e) => { handleChange(e, 'content') }}
+                            onBlur={sanitize}
+                            ref={contentRef}
+                            onClick={evaluateCaretPos}
+                        />
+
+                    </div>
                 </div>
             }
         </div >

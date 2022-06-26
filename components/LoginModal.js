@@ -18,7 +18,7 @@ export const LoginModal = () => {
                 <p className="description">Sign in via magic link with your email below</p>
                 <div>
                     <input
-                        className="border border-4 mt-5"
+                        className="border-4 mt-5"
                         type="email"
                         placeholder="Your email"
                         value={email}
@@ -31,14 +31,14 @@ export const LoginModal = () => {
                             e.preventDefault()
                             dispatch(logIn(email))
                         }}
-                        className='mt-5 mb-2 bg-blue-800 p-4 rounded-xl text-white'
+                        className={`mt-5 mb-2 ${auth.pending ? 'bg-slate-600' : 'bg-blue-900'} p-4 rounded-xl`}
                         disabled={auth.pending}
                     >
-                        <span>{auth.pending ? 'Loading' : 'Send magic link'}</span>
+                        <span className='text-white'>{auth.pending ? 'Loading' : 'Send magic link'}</span>
                     </button>
+                    <button onClick={() => { dispatch(hideModal()) }} className="bg-red-500 p-4 ml-5 rounded-md text-md text-white">Cancel</button>
                 </div>
-                <button onClick={() => { dispatch(hideModal()) }} className="bg-red-500 px-4 py-2 rounded-md text-md text-white">Cancel</button>
             </div>
-        </div>
+        </div >
     )
 }

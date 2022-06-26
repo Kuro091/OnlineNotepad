@@ -8,7 +8,9 @@ const initialState = {
     pending: false,
     error: false,
     isModalShow: false,
-    viewMode: 'list'
+    viewMode: 'list',
+    debounceValue: 750,
+    isLineModalShow: false
 }
 
 
@@ -48,6 +50,12 @@ export const authSlice = createSlice({
         },
         setViewMode: (state, { payload }) => {
             state.viewMode = payload;
+        },
+        setDebounceValue: (state, { payload }) => {
+            state.debounceValue = payload;
+        },
+        setIsLineModalShow: (state, { payload }) => {
+            state.isLineModalShow = payload;
         }
     },
     extraReducers: builder => {
@@ -84,7 +92,9 @@ export const {
     showModal,
     hideModal,
     setUserData,
-    setViewMode
+    setViewMode,
+    setDebounceValue,
+    setIsLineModalShow
 } = authSlice.actions
 
 export const selectUser = (state) => {

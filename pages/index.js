@@ -2,13 +2,14 @@ import { isEmpty } from 'lodash'
 import { useState, useEffect, useMemo, Fragment } from 'react'
 import { TailSpin } from 'react-loader-spinner'
 import { useDispatch, useSelector } from 'react-redux'
+import { LinePickModal } from '../components/LinePickModal'
 import { ListGrid } from '../components/ListGrid'
 import { LoginModal } from '../components/LoginModal'
 import { Main } from '../components/Main'
 import { SideBar } from '../components/SideBar'
 import { TopNav } from '../components/TopNav'
-import { logIn, logOut, setUserData } from '../features/auth/authSlice'
-import { getNotesServer, setNotes, addNote } from '../features/notes/notesSlice'
+import { logIn, logOut, setDebounceValue, setUserData } from '../features/auth/authSlice'
+import { getNotes, getNotesServer, setNotes, addNote } from '../features/notes/notesSlice'
 import { supabase } from '../utils/supabaseClient'
 
 function Home() {
@@ -17,7 +18,6 @@ function Home() {
   const auth = useSelector(state => state.auth);
   const viewMode = useSelector(state => state.auth.viewMode);
   const user = supabase.auth.user();
-
   useEffect(() => {
     if (user && isEmpty(auth.data)) {
       dispatch(setUserData(user))
@@ -25,22 +25,18 @@ function Home() {
     }
   }, [auth.data]);
 
-
-
   useEffect(() => {
-    dispatch(setNotes([]))
-    dispatch(addNote())
-
     supabase.auth.onAuthStateChange((_event, session) => {
-      console.log('_event ', _event);
       switch (_event) {
         case "SIGNED_IN":
           dispatch(setUserData(session.user))
           dispatch(getNotesServer(session.user.id));
+          dispatch(setDebounceValue(750))
           break;
         case "SIGNED_OUT":
           dispatch(setUserData({}))
-          dispatch(setNotes([]))
+          dispatch(getNotes())
+          dispatch(setDebounceValue(200))
           break;
 
       }
@@ -60,6 +56,7 @@ function Home() {
 
         {auth.isModalShow && <LoginModal />}
         <div className="min-h-screen h-full grid grid-rows-12 grid-cols-6 grid-flow-row text-white text-sm text-center">
+          {auth.isLineModalShow && <LinePickModal />}
           <div className="row-end-1 col-span-6 bg-gray-300">
             {/* TopNav */}
             <TopNav />

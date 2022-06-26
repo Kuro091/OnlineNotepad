@@ -1,7 +1,9 @@
 import { createAsyncThunk, createSlice, current } from '@reduxjs/toolkit'
 import { data } from 'autoprefixer';
+import { isEmpty } from 'lodash';
 import { useSelect } from 'react-supabase';
 import { v4 as uuidv4 } from 'uuid';
+import { localStorageHelper } from '../../utils/helper';
 import { supabase } from '../../utils/supabaseClient';
 
 const initialState = {
@@ -18,7 +20,8 @@ const initialState = {
         }
     ],
     pending: false,
-    error: false
+    error: false,
+    currentCaretPos: { caret: 0, lines: 0 }
 }
 
 
@@ -137,6 +140,14 @@ export const notesSlice = createSlice({
     name: 'notes',
     initialState,
     reducers: {
+        getNotes: (state, action) => {
+            state.data = []
+            const newNote = generateNewNote()
+            newNote.title = 'Sample note';
+            newNote.content.html = 'Sample note';
+            state.data.push(newNote);
+            return;
+        },
         setNotes: (state, { payload }) => {
             state.data = payload
         },
@@ -171,6 +182,9 @@ export const notesSlice = createSlice({
                 state.data[findIndex].updated_at = payload.updated_at;
                 state.pending = false
             }
+        },
+        setCurrentCaretPos: (state, { payload }) => {
+            state.currentCaretPos = payload;
         }
     },
     extraReducers: builder => {
@@ -230,11 +244,13 @@ const generateNewNote = () => {
 }
 
 export const {
+    getNotes,
     setSelected,
     updateNote,
     deleteNote,
     addNote,
-    setNotes
+    setNotes,
+    setCurrentCaretPos
 } = notesSlice.actions
 
 export const selectSelectedNote = (state) => {

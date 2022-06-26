@@ -4,11 +4,14 @@ import {
     TrashIcon,
     PencilAltIcon,
     UsersIcon,
-    BanIcon
+    BanIcon,
+    PhotographIcon
 } from "@heroicons/react/solid";
-import { isEmpty } from 'lodash';
+import { isEmpty, isFinite } from 'lodash';
+import _debounce from 'lodash/debounce';
+import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from "react-redux";
-import { showModal, logOut, selectUser, setViewMode } from '../features/auth/authSlice';
+import { showModal, logOut, selectUser, setViewMode, setDebounceValue, setIsLineModalShow } from '../features/auth/authSlice';
 import {
     addNoteServer,
     deleteNoteServer,
@@ -19,6 +22,7 @@ import {
 } from "../features/notes/notesSlice";
 
 import { supabase } from '../utils/supabaseClient';
+import { indexOfGroup } from '../utils/helper';
 
 
 export const TopNav = () => {
@@ -27,6 +31,45 @@ export const TopNav = () => {
     const notes = useSelector((state) => state.notes);
     const auth = useSelector(selectUser);
     const viewMode = useSelector(state => state.auth.viewMode);
+    const debounceValue = useSelector(state => state.auth.debounceValue);
+    const currentCaretPos = useSelector(state => state.notes.currentCaretPos);
+    const [debounceVal, setDebounceVal] = useState(200);
+
+    useEffect(() => {
+        setDebounceVal(debounceValue)
+    }, [debounceValue])
+
+    const handleChangeDebounceValue = useCallback((e) => {
+        const val = e.target.value;
+        if (isFinite(Number(val))) {
+            setDebounceVal(val)
+            if (val < 200) {
+                dispatch(setDebounceValue(200))
+                return;
+            }
+            if (val > 10000) {
+                dispatch(setDebounceValue(10000))
+                return;
+            }
+            dispatch(setDebounceValue(val))
+        }
+    })
+
+    const handleOnBlurDebounceValue = useCallback((e) => {
+        const val = e.target.value;
+        if (isFinite(Number(val))) {
+            setDebounceVal(val)
+            if (val < 200) {
+                setDebounceVal(200)
+                return;
+            }
+            if (val > 10000) {
+                setDebounceVal(10000)
+                return;
+            }
+        }
+    })
+
 
     const leftFeatures = [
         {
@@ -58,7 +101,7 @@ export const TopNav = () => {
                 }
                 dispatch(deleteNote(selectedNote.id))
             },
-            disabled: notes.data.length <= 0,
+            disabled: notes.data.length <= 0 || viewMode == 'list_grid',
         },
     ];
 
@@ -95,14 +138,37 @@ export const TopNav = () => {
 
         },
         {
-            name: "Listd",
-            type: "list",
-            icon: <ViewListIcon />,
+            name: "Photo",
+            type: "photo",
+            icon: <PhotographIcon />,
+            clickHandler: () => {
+                dispatch(setIsLineModalShow(true));
+                const re = /(<\/div>)/g;
+                const currentHtml = selectedNote.content.html;
+                let indexOfLine = 0;
+                if (currentHtml.match(re)) {
+                    indexOfLine = indexOfGroup(currentHtml.match(re), currentCaretPos.line - 1);
+                }
+
+                const caretPos = currentHtml.indexOf(currentCaretPos.text, indexOfLine) + currentCaretPos.text.length;
+
+                dispatch(updateNote({
+                    ...selectedNote, content: {
+                        html: currentHtml.slice(0, caretPos) + '<div><br/></div><div><img width=\'400\' src=\'https://emle.org/wp-content/uploads/revslider/blog/demo-img-2.png\'/></div>' + currentHtml.slice(caretPos)
+                    }
+                }))
+
+
+            },
         },
         {
             name: "Listw",
             type: "list",
             icon: <ViewListIcon />,
+            clickHandler: () => {
+                console.log('hi')
+                document.execCommand('bold', true)
+            }
         },
         {
             name: "Listf",
@@ -114,10 +180,11 @@ export const TopNav = () => {
             type: "list",
             icon: <ViewListIcon />,
         },
+
     ];
 
     return (
-        <div className="flex flex-row">
+        <div className="flex flex-row ">
             {leftFeatures &&
                 leftFeatures.map((feature) => (
                     <div
@@ -145,6 +212,11 @@ export const TopNav = () => {
                     </div>
                 ))
             }
+
+            <div className='text-black mt-5 ml-auto mr-5'>
+                Time to update 750 (0.75s) - 10000 (10s) (if logged in, put it at at least 750):
+                <input className='h-6' type="text" max='10000' value={debounceVal} onBlur={(e) => { handleOnBlurDebounceValue(e) }} onChange={(e) => handleChangeDebounceValue(e)} />
+            </div>
         </div >
     );
 };
