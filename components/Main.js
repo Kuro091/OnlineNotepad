@@ -71,7 +71,7 @@ export const Main = () => {
         debounceUpdateServer(updatedObj);
         contentRef.current.focus()
         return false;
-    })
+    }, [])
 
     const sanitizeConf = {
         allowedTags: ["b", "i", "em", "strong", "a", "p", "h1", "img", "div", "br"],
@@ -118,7 +118,7 @@ export const Main = () => {
         setTitle('');
         setContent('');
         setTimestamp('');
-    }, [selectedNote.id, selectedNote.content])
+    }, [selectedNote.id, selectedNote.content, re])
 
     return (
         <div className="h-full min-h-full">
@@ -135,7 +135,7 @@ export const Main = () => {
 
                         />
                         <div className='text-slate-400 col-span-1 row-[span_11_/_span_11] text-lg'>
-                            {lines.map(line => <div>{line} <br /></div>)}
+                            {lines.map(line => <div key={line}>{line} <br /></div>)}
                         </div>
                         <ContentEditable
                             disabled={notes.pending}
