@@ -7,11 +7,11 @@ import _debounce from 'lodash/debounce';
 import { selectUser } from '../features/auth/authSlice';
 import { isEmpty } from 'lodash';
 import sanitizeHtml from "sanitize-html";
-import { getSelectionCaretAndLine } from '../utils/helper';
+import { getCaretCharOffset, getSelectionCaretAndLine, indexOfGroup } from '../utils/helper';
+import { lineCount } from '../utils/lineCountHelper';
 
-export const Main = () => {
+export const Main = ({ contentRef }) => {
     const selectedNote = useSelector(selectSelectedNote)
-    const contentRef = createRef();
     const dispatch = useDispatch();
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
@@ -40,13 +40,22 @@ export const Main = () => {
         dispatch(updateNote(updatedObj));
     }
 
-    const evaluateCaretPos = () => {
-        if (contentRef.current) {
-            const currentPos = getSelectionCaretAndLine(contentRef.current.getEl());
-            return false;
-        }
-        return false;
-    }
+
+    // const evaluateCaretPos = () => {
+    //     if (contentRef.current) {
+    //         //contentRef.current.getEl()
+    //         const matches = re.exec(selectedNote.content.html);
+    //         if (matches) {
+    //             const selectionInfo = getSelectionCaretAndLine(contentRef.current.getEl());
+    //             const currentPos = indexOfGroup(matches, selectionInfo.line); // to figure out which line
+    //             console.log('currentPos', currentPos);
+    //             dispatch(setCurrentCaretPos(currentPos))
+    //             return false;
+    //         }
+
+    //     }
+    //     return false;
+    // }
 
     const handleChange = (e, type) => {
         const value = e.target.value === '<br>' ? ' ' : e.target.value;
@@ -59,7 +68,7 @@ export const Main = () => {
                 break;
             case 'content':
                 setContent(e.target.value);
-                evaluateCaretPos();
+                //evaluateCaretPos();
                 _content = value;
                 break;
         }
@@ -69,12 +78,11 @@ export const Main = () => {
             return false;
         }
         debounceUpdateServer(updatedObj);
-        contentRef.current.focus()
         return false;
     };
 
     const sanitizeConf = {
-        allowedTags: ["b", "i", "em", "strong", "a", "p", "h1", "img", "div", "br"],
+        allowedTags: ["b", "i", "em", "strong", "a", "p", "h1", 'div', "img", "br"],
         allowedAttributes: { a: ["href"], img: ['src', 'srcset', 'alt', 'title', 'width', 'height', 'loading'] }
     };
 
@@ -100,19 +108,22 @@ export const Main = () => {
         }
         return lineArr
     }
-    const re = /(<\/div>)|(img*)/g;
+
+
     useEffect(() => {
         if (selectedNote.id) {
             setTitle(selectedNote.title);
             setContent(selectedNote.content.html);
             setTimestamp({ type: 'created_at', text: 'Created at', timeStr: selectedNote.created_at.toLocaleString() })
-            const imgCount = 0;
-            if (selectedNote.content.html.match(re)) {
-                selectedNote.content.html.match(re).forEach((match) => { if (match == 'img') imgCount++ })
-                setLines(getNoOfLines(selectedNote.content.html.match(re).length + imgCount * 6));
-            } else {
-                setLines(getNoOfLines(3))
+            if (contentRef.current) {
+                let count = 0;
+                const matches = contentRef.current.el.current.innerHTML.match(/(<br|<img)/g);
+                if (matches) {
+                    matches.forEach(match => { if (match.includes('img')) count += 5; count += 1 })
+                    setLines(getNoOfLines(count));
+                }
             }
+
             return;
         }
         setTitle('');
@@ -134,22 +145,20 @@ export const Main = () => {
                             onBlur={sanitize}
 
                         />
-                        <div className='text-slate-400 col-span-1 row-[span_11_/_span_11] text-lg'>
-                            {lines.map(line => <div key={line}>{line} <br /></div>)}
-                        </div>
                         <ContentEditable
                             disabled={notes.pending}
-                            className='min-h-screen col-[span_11_/_span_11] row-[span_11_/_span_11]'
+                            className='min-h-screen col-span-full text-lg row-[span_11_/_span_11] editableCustomStyles'
                             html={content}
                             onChange={(e) => { handleChange(e, 'content') }}
                             onBlur={sanitize}
                             ref={contentRef}
-                            onClick={evaluateCaretPos}
+                        //onClick={evaluateCaretPos}
                         />
 
                     </div>
                 </div>
             }
-        </div >
+        </div>
+
     )
 };

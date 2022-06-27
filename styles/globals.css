@@ -2,3 +2,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .editableCustomStyles h1 {
+    @apply text-2xl;
+  }
+  .editableCustomStyles h2 {
+    @apply text-xl;
+  }
+  .editableCustomStyles h3 {
+    @apply text-lg;
+  }
+}

@@ -5,11 +5,13 @@ import {
 import { persistStore, persistReducer } from 'redux-persist'
 import authReducer from '../features/auth/authSlice';
 import notesReducer from '../features/notes/notesSlice'
+import photosReducer from '../features/photos/photosSlice'
 import storage from 'redux-persist/lib/storage' //localStorage
 
 const rootReducer = combineReducers({
     notes: notesReducer,
-    auth: authReducer
+    auth: authReducer,
+    photos: photosReducer,
 })
 
 const persistConfig = {

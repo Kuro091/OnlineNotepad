@@ -6,6 +6,28 @@ export function strip(html) {
     return root.textContent
 }
 
+export function getCaretCharOffset(element) {
+    var caretOffset = 0;
+
+    if (window.getSelection) {
+        var range = window.getSelection().getRangeAt(0);
+        var preCaretRange = range.cloneRange();
+        preCaretRange.selectNodeContents(element);
+        preCaretRange.setEnd(range.endContainer, range.endOffset);
+        caretOffset = preCaretRange.toString().length;
+    }
+
+    else if (document.selection && document.selection.type != "Control") {
+        var textRange = document.selection.createRange();
+        var preCaretTextRange = document.body.createTextRange();
+        preCaretTextRange.moveToElementText(element);
+        preCaretTextRange.setEndPoint("EndToEnd", textRange);
+        caretOffset = preCaretTextRange.text.length;
+    }
+
+    return caretOffset;
+}
+
 export const getSelectionCaretAndLine = (editable) => {
     // collapse selection to end
     window.getSelection().collapseToEnd();

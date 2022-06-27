@@ -5,11 +5,12 @@ import {
     PencilAltIcon,
     UsersIcon,
     BanIcon,
-    PhotographIcon
+    PhotographIcon,
+    MenuAlt1Icon
 } from "@heroicons/react/solid";
 import { isEmpty, isFinite } from 'lodash';
 import _debounce from 'lodash/debounce';
-import { useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { showModal, logOut, selectUser, setViewMode, setDebounceValue, setIsLineModalShow } from '../features/auth/authSlice';
 import {
@@ -25,15 +26,20 @@ import { supabase } from '../utils/supabaseClient';
 import { indexOfGroup } from '../utils/helper';
 
 
-export const TopNav = () => {
+const TopNav = () => {
     const dispatch = useDispatch();
     const selectedNote = useSelector(selectSelectedNote);
     const notes = useSelector((state) => state.notes);
     const auth = useSelector(selectUser);
     const viewMode = useSelector(state => state.auth.viewMode);
-    const debounceValue = useSelector(state => state.auth.debounceValue);
     const currentCaretPos = useSelector(state => state.notes.currentCaretPos);
+
+    const debounceValue = useSelector(state => state.auth.debounceValue);
     const [debounceVal, setDebounceVal] = useState(200);
+
+    const [subMenuActivation, setSubMenuActivation] = useState({
+        Formatting: false
+    })
 
     useEffect(() => {
         setDebounceVal(debounceValue)
@@ -143,32 +149,53 @@ export const TopNav = () => {
             icon: <PhotographIcon />,
             clickHandler: () => {
                 dispatch(setIsLineModalShow(true));
-                const re = /(<\/div>)/g;
-                const currentHtml = selectedNote.content.html;
-                let indexOfLine = 0;
-                if (currentHtml.match(re)) {
-                    indexOfLine = indexOfGroup(currentHtml.match(re), currentCaretPos.line - 1);
-                }
-
-                const caretPos = currentHtml.indexOf(currentCaretPos.text, indexOfLine) + currentCaretPos.text.length;
-
-                dispatch(updateNote({
-                    ...selectedNote, content: {
-                        html: currentHtml.slice(0, caretPos) + '<div><br/></div><div><img width=\'400\' src=\'https://emle.org/wp-content/uploads/revslider/blog/demo-img-2.png\'/></div>' + currentHtml.slice(caretPos)
-                    }
-                }))
-
-
             },
         },
         {
-            name: "Listw",
-            type: "list",
-            icon: <ViewListIcon />,
-            clickHandler: () => {
-                console.log('hi')
-                document.execCommand('bold', true)
-            }
+            name: "Formatting",
+            type: "format",
+            icon: <MenuAlt1Icon />,
+            clickHandler: (e) => {
+                e.preventDefault();
+                boldCommand();
+                setSubMenuActivation({ ...subMenuActivation, Formatting: !subMenuActivation['Formatting'] })
+            },
+            subMenu: [
+                {
+                    name: 'h1',
+                    clickHandler: (e) => {
+                        e.preventDefault();
+                        document.execCommand('formatBlock', false, 'h1');
+                        setSubMenuActivation({ ...subMenuActivation, Formatting: false })
+                    },
+                    className: 'text-2xl'
+                },
+                {
+                    name: 'h2',
+                    clickHandler: () => {
+                        document.execCommand('formatBlock', false, 'h2');
+                        setSubMenuActivation({ ...subMenuActivation, Formatting: false })
+
+                    },
+                    className: 'text-xl'
+                },
+                {
+                    name: 'h3',
+                    clickHandler: () => {
+                        setSubMenuActivation({ ...subMenuActivation, Formatting: false })
+                        document.execCommand('formatBlock', false, 'h3');
+                    },
+                    className: 'text-lg'
+                },
+                {
+                    name: 'normal',
+                    clickHandler: () => {
+                        setSubMenuActivation({ ...subMenuActivation, Formatting: false })
+                        document.execCommand('formatBlock', false, 'div');
+                    },
+                    className: ''
+                },
+            ]
         },
         {
             name: "Listf",
@@ -182,6 +209,14 @@ export const TopNav = () => {
         },
 
     ];
+
+    function boldCommand() {
+        const strongElement = document.createElement("strong");
+        const userSelection = window.getSelection();
+        //console.log(userSelection)
+        const selectedTextRange = userSelection.getRangeAt(0);
+        selectedTextRange.surroundContents(strongElement);
+    }
 
     return (
         <div className="flex flex-row ">
@@ -203,12 +238,20 @@ export const TopNav = () => {
             {
                 rightFeatures &&
                 rightFeatures.map((feature) => (
-                    <div
-                        onClick={feature.clickHandler}
-                        key={feature.name}
-                        className={`p-4 w-16 h-16 flex items-center justify-center rounded-lg text-gray-500 hover:cursor-pointer  ${feature.disabled ? 'pointer-events-none opacity-10' : ''}`}
-                    >
-                        {feature.icon}
+                    <div key={feature.name}>
+                        <div
+                            onClick={feature.clickHandler}
+                            className={`p-4 w-16 h-16 flex items-center justify-center rounded-lg text-gray-500 hover:cursor-pointer  ${feature.disabled ? 'pointer-events-none opacity-10' : ''}`}
+                        >
+                            {feature.icon}
+                        </div>
+
+                        {feature.subMenu != undefined && subMenuActivation[feature.name] &&
+                            <div className='bg-slate-900 text-left absolute w-fit py-7 px-4 '>
+                                {feature.subMenu.map((subMenu) => <div key={subMenu.name} className={subMenu.className + ' hover:bg-slate-100 hover:text-black hover:cursor-pointer'} onClick={subMenu.clickHandler}>Demo</div>)}
+
+                            </div>
+                        }
                     </div>
                 ))
             }
@@ -220,3 +263,5 @@ export const TopNav = () => {
         </div >
     );
 };
+
+export { TopNav }

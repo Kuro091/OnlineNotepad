@@ -1,5 +1,5 @@
 import { isEmpty } from 'lodash'
-import { useState, useEffect, useMemo, Fragment } from 'react'
+import { useState, useEffect, useMemo, Fragment, createRef } from 'react'
 import { TailSpin } from 'react-loader-spinner'
 import { useDispatch, useSelector } from 'react-redux'
 import { LinePickModal } from '../components/LinePickModal'
@@ -13,11 +13,16 @@ import { getNotes, getNotesServer, setNotes, addNote } from '../features/notes/n
 import { supabase } from '../utils/supabaseClient'
 
 function Home() {
+
+  const contentRef = createRef();
+
   const dispatch = useDispatch();
   const notes = useSelector(state => state.notes);
   const auth = useSelector(state => state.auth);
   const viewMode = useSelector(state => state.auth.viewMode);
   const user = supabase.auth.user();
+
+
   useEffect(() => {
     if (user && isEmpty(auth.data)) {
       dispatch(setUserData(user))
@@ -71,7 +76,7 @@ function Home() {
               </div>
               <div className="row-[span_12_/_span_12] col-span-5 p-4 border bg-white text-black">
                 {/* Main */}
-                <Main />
+                <Main contentRef={contentRef} />
               </div>
             </>
           }
