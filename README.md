@@ -3,7 +3,7 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Live 
 
-Try it live: https://online-notepad-57lkb5q5z-kuro091.vercel.app/
+Try it live: https://online-notepad-one.vercel.app/
 
 
 ## Getting Started
